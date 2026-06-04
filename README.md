@@ -1,10 +1,15 @@
 # crime-platform
 
-The command got cut off. Let me give you the commands one by one so it works properly.
+Crime database schema
+
+---
 
 Step 1: Create the schema
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "CREATE SCHEMA IF NOT EXISTS crime_data;"
+
+---
+
 Step 2: Create districts table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -16,6 +21,9 @@ CREATE TABLE IF NOT EXISTS crime_data.districts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 "
+
+---
+
 Step 3: Create crime types table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -27,6 +35,9 @@ CREATE TABLE IF NOT EXISTS crime_data.crime_types (
     severity_level INTEGER DEFAULT 1
 );
 "
+
+---
+
 Step 4: Create incidents table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -47,6 +58,9 @@ CREATE TABLE IF NOT EXISTS crime_data.incidents (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 "
+
+---
+
 Step 5: Insert districts
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -58,6 +72,9 @@ INSERT INTO crime_data.districts (district_code, district_name, division) VALUES
 ('AB01', 'Abaco Central', 'Abaco')
 ON CONFLICT (district_code) DO NOTHING;
 "
+
+---
+
 Step 6: Insert crime types
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -68,6 +85,9 @@ INSERT INTO crime_data.crime_types (crime_category, crime_subcategory, is_violen
 ('Homicide', 'Murder', true, 5),
 ('Robbery', 'Armed Robbery', true, 5);
 "
+
+---
+
 Step 7: Insert sample incidents
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -76,6 +96,9 @@ INSERT INTO crime_data.incidents (report_number, incident_date, district_id, cri
 ('R2025002', '2025-01-16', 2, 2, 'Residential Area', 'Break and enter, electronics stolen'),
 ('R2025003', '2025-01-20', 1, 5, 'Gas Station', 'Armed robbery at convenience store');
 "
+
+---
+
 Step 8: Create the view
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -91,6 +114,9 @@ JOIN crime_data.districts d ON i.district_id = d.district_id
 JOIN crime_data.crime_types ct ON i.crime_type_id = ct.crime_type_id
 GROUP BY i.incident_date, d.district_name, ct.crime_category;
 "
+
+---
+
 Step 9: Verify everything
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "SELECT * FROM crime_data.daily_crime_summary;"
