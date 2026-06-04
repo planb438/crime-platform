@@ -227,11 +227,8 @@ ORDER BY total_crimes DESC;
 "
 ---
 
-Excellent! This is real-world crime report data. Let me help you structure your database to handle both structured (like the Stolen Vehicle Alert) and unstructured (like the narrative police reports) data.
-
 Enhanced Database Schema for Real Crime Reports
-
-Perfect! Let's do this step by step, one command at a time.
+---
 
 Step 1: Add new tables for real crime reports
 bash
@@ -243,6 +240,9 @@ CREATE TABLE IF NOT EXISTS crime_data.weapons (
     confiscated BOOLEAN DEFAULT FALSE
 );
 "
+
+---
+
 Step 2: Create arrests table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -261,6 +261,9 @@ CREATE TABLE IF NOT EXISTS crime_data.arrests (
     custody_status VARCHAR(50)
 );
 "
+
+---
+
 Step 3: Create stolen vehicles table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -279,6 +282,9 @@ CREATE TABLE IF NOT EXISTS crime_data.stolen_vehicles (
     status VARCHAR(30) DEFAULT 'stolen'
 );
 "
+
+---
+
 Step 4: Create evidence table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -292,6 +298,9 @@ CREATE TABLE IF NOT EXISTS crime_data.evidence (
     processed BOOLEAN DEFAULT FALSE
 );
 "
+
+---
+
 Step 5: Create police units table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -301,6 +310,9 @@ CREATE TABLE IF NOT EXISTS crime_data.police_units (
     unit_type VARCHAR(50)
 );
 "
+
+---
+
 Step 6: Create incident_units link table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -309,6 +321,9 @@ CREATE TABLE IF NOT EXISTS crime_data.incident_units (
     unit_id INTEGER REFERENCES crime_data.police_units(unit_id)
 );
 "
+
+---
+
 Step 7: Add new columns to incidents table
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -318,6 +333,9 @@ ADD COLUMN IF NOT EXISTS technology_involved BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS shotspotter_detected BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS narrative TEXT;
 "
+
+---
+
 Step 8: Insert police units
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -327,6 +345,9 @@ INSERT INTO crime_data.police_units (unit_name, unit_type) VALUES
 ('Police Bomb Squad', 'Specialized'),
 ('Anti-Gang and Firearms Investigation Task Force', 'Task Force');
 "
+
+---
+
 Step 9: Insert the firearm incident
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -352,6 +373,9 @@ INSERT INTO crime_data.incidents (
     'under_investigation'
 );
 "
+
+---
+
 Step 10: Insert arrests for the firearm incident
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -381,6 +405,9 @@ INSERT INTO crime_data.arrests (
 ) VALUES 
     (1, 'Unknown', 29, 'Bahamian', '2026-05-26', 'Possession of firearm and ammunition', true, 'in custody');
 "
+
+---
+
 Step 11: Insert stolen vehicle incident
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -404,6 +431,9 @@ INSERT INTO crime_data.incidents (
     'under_investigation'
 );
 "
+
+---
+
 Step 12: Insert stolen vehicle details
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -429,6 +459,9 @@ INSERT INTO crime_data.stolen_vehicles (
     'stolen'
 );
 "
+
+---
+
 Step 13: Insert ATM skimming incident
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -454,6 +487,9 @@ INSERT INTO crime_data.incidents (
     'under_investigation'
 );
 "
+
+---
+
 Step 14: Insert arrest for skimming
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -475,6 +511,9 @@ INSERT INTO crime_data.arrests (
     'in custody'
 );
 "
+
+---
+
 Step 15: Insert evidence for skimming
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -490,6 +529,9 @@ INSERT INTO crime_data.evidence (
     'Bulgarian suspect'
 );
 "
+
+---
+
 Step 16: Verify all data was inserted
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -509,6 +551,9 @@ ORDER BY i.incident_date DESC;
 
 Perfect! Now let's verify everything is working and run some meaningful queries on your crime data.
 
+
+---
+
 Step 17: View all incidents with their details
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -523,6 +568,9 @@ SELECT
 FROM crime_data.incidents
 ORDER BY incident_date DESC;
 "
+
+---
+
 Step 18: Show arrests by incident
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -536,6 +584,9 @@ SELECT
 FROM crime_data.incidents i
 JOIN crime_data.arrests a ON i.incident_id = a.incident_id;
 "
+
+---
+
 Step 19: Show stolen vehicles
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -563,6 +614,9 @@ SELECT
 FROM crime_data.incidents i
 JOIN crime_data.evidence e ON i.incident_id = e.incident_id;
 "
+
+---
+
 Step 21: Summary statistics for your dashboard
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -587,6 +641,9 @@ SELECT
 FROM crime_data.incidents
 WHERE technology_involved = true OR shotspotter_detected = true;
 "
+
+---
+
 Step 22: Crime by type breakdown
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -597,6 +654,9 @@ FROM crime_data.incidents
 GROUP BY incident_type
 ORDER BY total DESC;
 "
+
+---
+
 Step 23: International suspects involved
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -609,6 +669,9 @@ JOIN crime_data.incidents i ON a.incident_id = i.incident_id
 WHERE suspect_nationality != 'Bahamian'
 GROUP BY suspect_nationality;
 "
+
+---
+
 Step 24: Recent arrests (last 7 days)
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -623,6 +686,9 @@ JOIN crime_data.incidents i ON a.incident_id = i.incident_id
 ORDER BY a.arrest_date DESC
 LIMIT 10;
 "
+
+---
+
 Step 25: Create a simplified view for daily reporting
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -639,6 +705,9 @@ LEFT JOIN crime_data.arrests a ON i.incident_id = a.incident_id
 GROUP BY i.incident_id, i.incident_date, i.incident_type, i.location_name, i.description, i.shotspotter_detected
 ORDER BY i.incident_date DESC;
 "
+
+---
+
 Step 26: Test the daily view
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -661,7 +730,11 @@ Import complete!
 ubuntu@ip-10-0-1-220:~/Python-Scraper$
 🎉 Excellent! Successfully imported 3,718 incidents from the RBDF crime reports! That's a substantial dataset for analysis.
 
+---
+
 Let's explore your imported crime data
+---
+
 1. Quick overview of the data
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -673,6 +746,9 @@ SELECT
     COUNT(DISTINCT location_name) as locations
 FROM crime_data.incidents;
 "
+
+---
+
 2. Crime type distribution
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -685,6 +761,9 @@ GROUP BY incident_type
 ORDER BY count DESC
 LIMIT 10;
 "
+
+---
+
 3. Monthly crime trends (2026)
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -698,6 +777,9 @@ WHERE incident_date >= '2026-01-01'
 GROUP BY DATE_TRUNC('month', incident_date)
 ORDER BY month DESC;
 "
+
+---
+
 4. Top locations for crime
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -711,6 +793,9 @@ GROUP BY location_name
 ORDER BY incidents DESC
 LIMIT 15;
 "
+
+---
+
 5. Weapons and injuries analysis
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
@@ -724,6 +809,9 @@ WHERE injuries_count > 0 OR fatalities_count > 0
 GROUP BY incident_type
 ORDER BY total_fatalities DESC;
 "
+
+---
+
 6. Create a summary view for your dashboard
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics << 'EOF'
@@ -740,6 +828,9 @@ WHERE incident_date IS NOT NULL
 GROUP BY DATE(incident_date), incident_type, location_name
 ORDER BY date DESC;
 EOF
+
+---
+
 7. Check the summary view
 bash
 kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "SELECT * FROM crime_data.crime_summary_stats LIMIT 20;"
@@ -763,3 +854,228 @@ Hotspot analysis
 Officer safety alerts
 
 Which would you like to do next? I recommend Grafana first so you can see your 3,718 incidents visualized on dashboards!
+
+---
+
+Improvement for Manual Entry:
+---
+
+Step 1: Add helper columns for manual entry
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "ALTER TABLE crime_data.incidents ADD COLUMN IF NOT EXISTS reporter_name VARCHAR(100);"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "ALTER TABLE crime_data.incidents ADD COLUMN IF NOT EXISTS reporter_badge VARCHAR(20);"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "ALTER TABLE crime_data.incidents ADD COLUMN IF NOT EXISTS entered_by VARCHAR(50) DEFAULT 'manual_entry';"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "ALTER TABLE crime_data.incidents ADD COLUMN IF NOT EXISTS last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+
+---
+
+Step 2: Create view for manual entry
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+CREATE OR REPLACE VIEW crime_data.manual_entry_form AS
+SELECT 
+    incident_id,
+    report_number,
+    incident_date,
+    incident_type,
+    location_name,
+    description,
+    injuries_count,
+    fatalities_count,
+    reporter_name,
+    reporter_badge,
+    status
+FROM crime_data.incidents
+WHERE entered_by = 'manual_entry'
+ORDER BY incident_id DESC;
+"
+
+---
+
+Step 3: Create function to auto-generate report numbers
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+CREATE OR REPLACE FUNCTION generate_report_number()
+RETURNS TRIGGER AS \$\$
+BEGIN
+    IF NEW.report_number IS NULL THEN
+        NEW.report_number := 'MANUAL-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(NEW.incident_id::text, 4, '0');
+    END IF;
+    RETURN NEW;
+END;
+\$\$ LANGUAGE plpgsql;
+"
+
+---
+
+Step 4: Create trigger for auto report numbers
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "DROP TRIGGER IF EXISTS auto_report_number ON crime_data.incidents;"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+CREATE TRIGGER auto_report_number
+    BEFORE INSERT ON crime_data.incidents
+    FOR EACH ROW
+    EXECUTE FUNCTION generate_report_number();
+"
+
+---
+
+Step 5: Add validation constraints
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+ALTER TABLE crime_data.incidents 
+ADD CONSTRAINT valid_incident_date 
+CHECK (incident_date <= CURRENT_DATE);
+"
+
+---
+
+Step 6: Create dropdown helper table
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+CREATE TABLE IF NOT EXISTS crime_data.incident_types_lookup (
+    type_id SERIAL PRIMARY KEY,
+    type_name VARCHAR(50) UNIQUE NOT NULL,
+    category VARCHAR(50),
+    is_violent BOOLEAN DEFAULT FALSE
+);
+"
+
+---
+
+Step 7: Insert common types
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Assault', 'Violent Crime', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Burglary', 'Property Crime', false)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Theft', 'Property Crime', false)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Homicide', 'Violent Crime', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Robbery', 'Violent Crime', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Shooting', 'Weapons Violation', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Drug Related', 'Narcotics', false)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Sexual Assault', 'Violent Crime', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Stolen Vehicle', 'Property Crime', false)
+ON CONFLICT (type_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incident_types_lookup (type_name, category, is_violent) VALUES
+('Firearm Possession', 'Weapons Violation', true)
+ON CONFLICT (type_name) DO NOTHING;
+"
+
+---
+
+Step 8: Create lookup for status values
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+CREATE TABLE IF NOT EXISTS crime_data.status_lookup (
+    status_id SERIAL PRIMARY KEY,
+    status_name VARCHAR(30) UNIQUE NOT NULL
+);
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.status_lookup (status_name) VALUES ('under_investigation')
+ON CONFLICT (status_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.status_lookup (status_name) VALUES ('closed')
+ON CONFLICT (status_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.status_lookup (status_name) VALUES ('unsolved')
+ON CONFLICT (status_name) DO NOTHING;
+"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.status_lookup (status_name) VALUES ('referred_to_court')
+ON CONFLICT (status_name) DO NOTHING;
+"
+
+---
+
+Step 9: Verify everything worked
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "SELECT * FROM crime_data.incident_types_lookup;"
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "SELECT * FROM crime_data.status_lookup;"
+Step 10: Test a manual entry
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+INSERT INTO crime_data.incidents (
+    incident_date,
+    incident_type,
+    location_name,
+    description,
+    reporter_name,
+    reporter_badge
+) VALUES (
+    '2026-06-04',
+    'Assault',
+    'Downtown Nassau',
+    'Officer responded to disturbance at bar',
+    'Officer Johnson',
+    'B1234'
+)
+RETURNING report_number, incident_id;
+"
+
+---
+
+Summary: Your Database Structure
+Aspect	Rating	Notes
+Manual Entry Ready	⭐⭐⭐⭐	Good, with minor improvements added
+Validation	⭐⭐⭐	Has date validation, could add more
+Auto-generation	⭐⭐⭐⭐	Auto report numbers and timestamps
+Lookup tables	⭐⭐⭐⭐⭐	Added dropdown helpers
+Audit trail	⭐⭐⭐	Tracks who entered data
+Verdict: Your database is well-structured for manual entry now that we've added the helper tables and auto-generation features. You can enter data with just 3-4 fields, and the rest auto-populates.
+
