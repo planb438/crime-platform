@@ -650,3 +650,116 @@ What's Working Now:
 ✅ Tracked technology involvement (ShotSpotter, skimming devices)
 ✅ International suspect tracking
 ✅ Views for daily crime reporting
+
+---
+
+Processed 3700 incidents...
+
+Import complete!
+   - 3718 incidents imported
+   - 0 errors encountered
+ubuntu@ip-10-0-1-220:~/Python-Scraper$
+🎉 Excellent! Successfully imported 3,718 incidents from the RBDF crime reports! That's a substantial dataset for analysis.
+
+Let's explore your imported crime data
+1. Quick overview of the data
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+SELECT 
+    COUNT(*) as total_incidents,
+    COUNT(DISTINCT incident_type) as crime_categories,
+    MIN(incident_date) as earliest_report,
+    MAX(incident_date) as latest_report,
+    COUNT(DISTINCT location_name) as locations
+FROM crime_data.incidents;
+"
+2. Crime type distribution
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+SELECT 
+    incident_type,
+    COUNT(*) as count,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 1) as percentage
+FROM crime_data.incidents
+GROUP BY incident_type
+ORDER BY count DESC
+LIMIT 10;
+"
+3. Monthly crime trends (2026)
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+SELECT 
+    TO_CHAR(DATE_TRUNC('month', incident_date), 'YYYY-MM') as month,
+    COUNT(*) as total_incidents,
+    COUNT(CASE WHEN incident_type = 'Shooting' THEN 1 END) as shootings,
+    COUNT(CASE WHEN incident_type = 'Firearm Related' THEN 1 END) as firearm_related
+FROM crime_data.incidents
+WHERE incident_date >= '2026-01-01'
+GROUP BY DATE_TRUNC('month', incident_date)
+ORDER BY month DESC;
+"
+4. Top locations for crime
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+SELECT 
+    location_name,
+    COUNT(*) as incidents,
+    COUNT(DISTINCT incident_type) as crime_types
+FROM crime_data.incidents
+WHERE location_name NOT IN ('Unknown', 'NEW PROVIDENCE')
+GROUP BY location_name
+ORDER BY incidents DESC
+LIMIT 15;
+"
+5. Weapons and injuries analysis
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "
+SELECT 
+    incident_type,
+    SUM(injuries_count) as total_injuries,
+    SUM(fatalities_count) as total_fatalities,
+    COUNT(*) as total_incidents
+FROM crime_data.incidents
+WHERE injuries_count > 0 OR fatalities_count > 0
+GROUP BY incident_type
+ORDER BY total_fatalities DESC;
+"
+6. Create a summary view for your dashboard
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics << 'EOF'
+CREATE OR REPLACE VIEW crime_data.crime_summary_stats AS
+SELECT 
+    DATE(incident_date) as date,
+    incident_type,
+    location_name,
+    COUNT(*) as incident_count,
+    SUM(injuries_count) as injuries,
+    SUM(fatalities_count) as fatalities
+FROM crime_data.incidents
+WHERE incident_date IS NOT NULL
+GROUP BY DATE(incident_date), incident_type, location_name
+ORDER BY date DESC;
+EOF
+7. Check the summary view
+bash
+kubectl exec -n postgres postgres-8b87874bc-5lqrw -- psql -U crime_analyst -d crime_analytics -c "SELECT * FROM crime_data.crime_summary_stats LIMIT 20;"
+What's Next?
+Your database now has 3,718 real crime incidents from the Royal Bahamas Police Force. You can now:
+
+Option 1: Deploy Grafana Dashboard
+Visualize crime trends, heatmaps, and time-series analysis
+
+Option 2: Deploy pgAdmin
+Manage and query your data with a GUI
+
+Option 3: Create API Layer
+Build a REST API for mobile apps or internal tools
+
+Option 4: Run Advanced Analytics
+Crime prediction models
+
+Hotspot analysis
+
+Officer safety alerts
+
+Which would you like to do next? I recommend Grafana first so you can see your 3,718 incidents visualized on dashboards!
