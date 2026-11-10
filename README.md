@@ -10,32 +10,33 @@
 
 ## 📋 Overview
 
-#### A production-ready, cloud-native crime intelligence platform that ingests, stores, and visualizes daily crime reports from the Royal Bahamas Police Force. Built with Kubernetes security best practices and GitOps principles.
+A production-ready, cloud-native crime intelligence platform that ingests, stores, and visualizes daily crime reports from the Royal Bahamas Police Force. Built with Kubernetes security best practices and GitOps principles.
 
 # 🎯 Business Impact
-#### - **3,718+ crime incidents** ingested and analyzed
-#### - **Real-time crime visualization** for law enforcement
-#### - **Automated reporting pipeline** from RBPF public reports
-#### - **Secure by design** implementing CKS-level security controls
+- **3,718+ crime incidents** ingested and analyzed
+- **Real-time crime visualization** for law enforcement
+- **Automated reporting pipeline** from RBPF public reports
+- **Secure by design** implementing CKS-level security controls
 
 # 🏗️ Architecture
-#### ┌─────────────────┐ ┌──────────────┐ ┌─────────────┐
-#### │ RBPF Website │────▶│ Python │────▶│ PostgreSQL │
-#### │ Crime Reports │ │ Scraper │ │ (Primary) │
-#### └─────────────────┘ └──────────────┘ └──────┬──────┘
-#### │
-#### ┌────────▼────────┐
-#### │ Grafana │
-#### │ Dashboards │
-#### └─────────────────┘
-
-text
+```text
+┌─────────────────┐ ┌──────────────┐ ┌─────────────┐
+│ RBPF Website │────▶│ Python │────▶│ PostgreSQL │
+│ Crime Reports │ │ Scraper │ │ (Primary) │
+└─────────────────┘ └──────────────┘ └──────┬──────┘
+│
+┌────────▼────────┐
+│ Grafana │
+│ Dashboards │
+└─────────────────┘
+```
 
 # 📊 Database Schema
 
-####  Core Tables
+Core Tables
 
-#### sql
+
+```text
     -- Crime incidents (3,718 records)
     crime_data.incidents
       ├── incident_id (SERIAL PRIMARY KEY)
@@ -48,15 +49,16 @@ text
       ├── injuries_count (INTEGER)
       ├── fatalities_count (INTEGER)
       └── status (VARCHAR(30))
+```
 
-#### -- Supporting tables
-#### crime_data.arrests        -- 1,200+ arrest records
-#### crime_data.districts      -- Police districts mapping
-#### crime_data.crime_types    -- Crime categorization
+-- Supporting tables
+crime_data.arrests        -- 1,200+ arrest records
+crime_data.districts      -- Police districts mapping
+crime_data.crime_types    -- Crime categorization
 
-#### 🚀 Quick Deployment
-#### Prerequisites
-#### Kubernetes cluster (1.28+)
+🚀 Quick Deployment
+Prerequisites
+Kubernetes cluster (1.28+)
 
     kubectl configured
 
@@ -64,8 +66,8 @@ text
 
     Argo CD 
 
-#### One-Click Deployment
-bash
+One-Click Deployment
+```bash
 # 1. Clone repository
     git clone https://github.com/yourusername/rbdf-crime-analytics.git
     cd rbdf-crime-analytics
@@ -83,8 +85,10 @@ bash
 # 5. Access Grafana
     kubectl port-forward -n postgres svc/grafana 3000:3000
 # Open http://localhost:3000 (admin/admin123)
-#### 📁 Project Structure
-#### text
+```
+
+📁 Project Structure
+```text
     rbdf-crime-analytics/
     ├── k8s/                           # Kubernetes manifests
     │   ├── postgres-deployment.yaml   # PostgreSQL StatefulSet
@@ -105,19 +109,20 @@ bash
     │   ├── query-examples.sql
     │   └── security-hardening.md
     └── README.md
+```
 
 # 🔐 Security Features
-#### Network Policies: Restrict database access to authorized services only
+Network Policies: Restrict database access to authorized services only
 
-#### Pod Security: Running as non-root with read-only root filesystem
+Pod Security: Running as non-root with read-only root filesystem
 
-#### Encryption: Secrets encrypted at rest in etcd
+Encryption: Secrets encrypted at rest in etcd
 
-#### Audit Logging: All database queries logged for compliance
+Audit Logging: All database queries logged for compliance
 
 # 📈 Sample Queries
-#### Crime Trends by Month
-    sql
+Crime Trends by Month
+```sql
     SELECT 
         DATE_TRUNC('month', incident_date) as month,
         COUNT(*) as total_incidents,
@@ -126,8 +131,10 @@ bash
     WHERE incident_date >= '2026-01-01'
     GROUP BY month
     ORDER BY month DESC;
-#### Top 10 Crime Locations
-#### sql
+```
+
+Top 10 Crime Locations
+```sql
     SELECT 
         location_name,
         COUNT(*) as incident_count,
@@ -139,93 +146,103 @@ bash
     LIMIT 10;
 
 # 🛠️ Maintenance
-#### Backup Database
-#### bash
+```
+
+Backup Database
+```bash
     ./scripts/backup_db.sh
-#### Update Crime Data
-#### bash
+```
+
+Update Crime Data
+```bash
 # Scrape latest reports
     python scripts/scraper.py --start 968 --end 1000
 
 # Import to database
     python scripts/import_crime_data.py --file rbdf_crime_reports.json
+```
+
 Restore from Backup
-#### bash
+```bash
     kubectl exec -n postgres postgres-0 -- psql -U crime_analyst -d crime_analytics < backup.sql
 
 # 🐛 Troubleshooting
-#### Issue	Solution
-#### ImagePullBackOff	Check internet connectivity to Docker Hub
-#### PostgreSQL connection refused	Verify service is running: kubectl get pods -n postgres
-#### Grafana no data	Check datasource configuration in Grafana UI
+```
+
+Issue	Solution
+ImagePullBackOff	Check internet connectivity to Docker Hub
+PostgreSQL connection refused	Verify service is running: kubectl get pods -n postgres
+Grafana no data	Check datasource configuration in Grafana UI
 
 # 📈 Performance Metrics
-#### Query response time: < 100ms for indexed queries
+Query response time: < 100ms for indexed queries
 
-#### Data ingestion: 3,718 records in < 5 seconds
+Data ingestion: 3,718 records in < 5 seconds
 
-#### Storage usage: ~50MB for full dataset
+Storage usage: ~50MB for full dataset
 
-#### Pod resource usage: PostgreSQL ~256MB, Grafana ~200MB
+Pod resource usage: PostgreSQL ~256MB, Grafana ~200MB
 
 # 🚧 Roadmap
-#### Deploy Prometheus for PostgreSQL monitoring
+Deploy Prometheus for PostgreSQL monitoring
 
-#### Implement automated daily scrapes via CronJob
+Implement automated daily scrapes via CronJob
 
-#### Add predictive analytics for crime hotspots
+Add predictive analytics for crime hotspots
 
-#### Create officer safety alert dashboard
+Create officer safety alert dashboard
 
-#### Integrate with Slack for real-time alerts
+Integrate with Slack for real-time alerts
 
 # 🤝 Contributing
-#### This is a personal portfolio project demonstrating Kubernetes security expertise. For law enforcement inquiries, please contact directly.
+This is a personal portfolio project demonstrating Kubernetes security expertise. For law enforcement inquiries, please contact directly.
 
 # 📝 License
-#### MIT License - See LICENSE file for details
+MIT License - See LICENSE file for details
 
 # 👤 Author
-#### Adari Bain
+Adari Bain
 
-#### Certified Kubernetes Security Specialist (CKS)
+Certified Kubernetes Security Specialist (CKS)
 
-#### GitHub
+GitHub
 
-#### LinkedIn
+LinkedIn
 
-#### Upwork
+Upwork
 
 # 🙏 Acknowledgments
-#### Royal Bahamas Police Force for public crime data
+Royal Bahamas Police Force for public crime data
 
-#### Bitnami for PostgreSQL Helm charts
+Bitnami for PostgreSQL Helm charts
 
-#### Grafana Labs for visualization tools
+Grafana Labs for visualization tools
 
-#### Built with ☁️ by a CKS-certified engineer for public safety
+Built with ☁️ by a CKS-certified engineer for public safety
 
-#### text
+```text
 
 ## **Additional Documentation Files**
 
 ### **docs/security-hardening.md**
 
-markdown
 # Security Hardening for RBDF Crime Platform
 
 ## CKS-Level Security Controls Implemented
 
 ### 1. Pod Security Standards
-#### yaml
+```
+
+```yaml
     securityContext:
       runAsNonRoot: true
       runAsUser: 1000
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
+```
 
-#### 2. Network Policies
-#### yaml
+2. Network Policies
+```yaml
     apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
@@ -241,40 +258,44 @@ markdown
               app: grafana
         ports:
         - port: 5432
+```
 
-#### 3. Secret Management
+3. Secret Management
 
-#### Database credentials stored as Kubernetes Secrets
+Database credentials stored as Kubernetes Secrets
 
-#### No plaintext passwords in YAML files
+No plaintext passwords in YAML files
 
-#### Secrets encrypted at rest (etcd encryption enabled)
+Secrets encrypted at rest (etcd encryption enabled)
 
-#### 4. Audit Logging
+4. Audit Logging
 
-#### bash
+```bash
 
 # Enable audit logging for PostgreSQL
     kubectl exec -n postgres postgres-0 -- \
       psql -c "ALTER SYSTEM SET log_statement = 'ddl';"
-#### Compliance Checklist
-#### Non-root containers
+```
 
-#### Read-only root filesystem
+Compliance Checklist
+Non-root containers
 
-#### Network policies enforced
+Read-only root filesystem
 
-#### Resource limits configured
+Network policies enforced
 
-#### Secrets encrypted
+Resource limits configured
 
-#### Audit logging enabled
+Secrets encrypted
 
-text
+Audit logging enabled
+
+```text
 
 ### **scripts/backup_db.sh**
+```
 
-#### bash
+```bash
     #!/bin/bash
     # Database backup script
 
@@ -296,29 +317,29 @@ text
     makefile
     .PHONY: deploy-postgres deploy-grafana import-data backup destroy
 
-#### deploy-all: deploy-postgres deploy-grafana
+deploy-all: deploy-postgres deploy-grafana
 	@echo "✅ All services deployed"
 
-#### deploy-postgres:
+deploy-postgres:
 	kubectl apply -f k8s/postgres-deployment.yaml
 	@echo "✅ PostgreSQL deployed"
 
-#### deploy-grafana:
+deploy-grafana:
 	kubectl apply -f k8s/grafana-deployment.yaml
 	@echo "✅ Grafana deployed"
 
-#### import-data:
+import-data:
 	kubectl cp data/rbdf_crime_reports.json postgres/postgres-0:/tmp/
 	kubectl exec -n postgres postgres-0 -- python3 /tmp/import_crime_data.py
 	@echo "✅ Data imported"
 
-#### backup:
+backup:
 	./scripts/backup_db.sh
 
-#### destroy:
+destroy:
 	kubectl delete namespace postgres
 	@echo "✅ All resources removed"
 
-#### status:
+status:
 	kubectl get pods,svc -n postgres
-
+```
